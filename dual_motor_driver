@@ -1,0 +1,26 @@
+# File: dual_motor_driver.py
+from machine import Pin
+from motor_driver import MotorDriver
+
+class DualMotorDriver:
+    def __init__(self, left_ids: tuple, right_ids: tuple, stby_id: int):
+        self.left_motor = MotorDriver(*left_ids)
+        self.right_motor = MotorDriver(*right_ids)
+        self.stby_pin = Pin(stby_id, Pin.OUT)
+        self.enable()
+
+    def enable(self):
+        self.stby_pin.on()
+
+    def disable(self):
+        self.stby_pin.off()
+        self.stop()
+
+    def stop(self):
+        self.left_motor.stop()
+        self.right_motor.stop()
+
+    def move(self, left_speed, right_speed):
+        # The right motor is physically flipped, so we invert its speed command.
+        self.left_motor.drive(left_speed)
+        self.right_motor.drive(right_speed, direction=-1)
