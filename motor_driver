@@ -1,0 +1,30 @@
+# File: motor_driver.py
+from machine import Pin, PWM
+
+class MotorDriver:
+    def __init__(self, pwm_id, in1_id, in2_id):
+        self.pwm_pin = PWM(Pin(pwm_id))
+        self.pwm_pin.freq(1000)
+        self.in1_pin = Pin(in1_id, Pin.OUT)
+        self.in2_pin = Pin(in2_id, Pin.OUT)
+
+    def stop(self):
+        self.pwm_pin.duty_u16(0)
+        self.in1_pin.off()
+        self.in2_pin.off()
+
+    def drive(self, speed=0.0, direction=1):
+        speed = max(-1.0, min(1.0, speed))
+        if direction == -1:
+            speed = -speed
+
+        if speed > 0: # Forward
+            self.in1_pin.off()
+            self.in2_pin.on()
+            self.pwm_pin.duty_u16(int(65535 * abs(speed)))
+        elif speed < 0: # Backward
+            self.in1_pin.on()
+            self.in2_pin.off()
+            self.pwm_pin.duty_u16(int(65535 * abs(speed)))
+        else: # Stop
+            self.stop()

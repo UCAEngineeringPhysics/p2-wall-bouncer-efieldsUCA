@@ -1,3 +1,4 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/LMWu6GmP)
 # Project 2: Wall Bouncer
 
 ## Background
@@ -83,7 +84,9 @@ Major required components are listed below:
 - Denote dimensions and locations of the wheel assembly and the caster wheel.
 - Denote locations of the mounting holes.
 - Denote dimensions of the mounting holes.
-
+![Dimensions](p2_measure_front.JPG)
+![Dimensions](p2_measure_side.JPG)
+![Dimensions](p2_measre_rear.JPG)
 > [!TIP]
 > - You may want to checkout TechDraw of FreeCAD. Other CAD software should have the similar tools.  
 > - Hand drawings are acceptable.
@@ -92,11 +95,63 @@ Major required components are listed below:
 - Specify power wires using red and black wires.
 - Mark out employed signal pins' names.
 - Electronic components' values have to match your actual circuit.
+![Cicuit Diagram](20251127_210534.jpg)
 
 #### 3.3 (6%) Software Design
 Use a [flowchart](https://en.wikipedia.org/wiki/Flowchart) or a [algorithm/pseudocode table](https://www.overleaf.com/learn/latex/Algorithms) or a [itemized list](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#lists) to explain your wall avoidance strategy.
+Input: Ultrasonic Distance (d), Button State (b), Time (t)
+Output: Motor Velocity (v), LED Color (c)
+Parameters: 
+    Safe_Dist = 0.25 m
+    Retreat_Dist = 1.0 m
+    Battery_Low_Time = 45 s
+
+ ### 3.3 Software Design
+
+**Wall Avoidance Strategy:**<br>
+The robot employs a linear "stop-and-reverse" strategy. Instead of turning, the robot maintains a straight trajectory. When the ultrasonic sensor detects an obstacle within the safety threshold ($< 25cm$), the robot halts, waits, and reverses direction until it reaches a safe retreat distance ($> 100cm$), effectively "bouncing" back and forth linearly.
+
+**Algorithm 1: Wall Bouncer State Machine**
+
+| Step | State | Action / Logic |
+| :--- | :--- | :--- |
+| **1** | **Initialization** | Initialize Hardware. Check Sensor ($>0$).<br>If Error: **Red LED** & Halt.<br>If Pass: **Flash White LED** & Enter PAUSE. |
+| **2** | **PAUSE_MODE** | **Stop Motors**. Fade Green LED (1Hz).<br>Wait for Button Press -> Enter WORK_MODE. |
+| **3** | **WORK_MODE** | **Check Battery:** If time > 45s, Set Blue LED & 50% Speed.<br>**Drive Forward:** Move at set speed.<br>**Check Sensor:** If Dist < 0.25m -> Go to STOP_1. |
+| **4** | **STOP_1** | **Stop Motors.** Set Red LED.<br>Wait 1.0 seconds -> Go to BACKWARD_1. |
+| **5** | **BACKWARD_1** | **Drive Backward:** Move at set speed.<br>**Check Sensor:** If Dist > 1.0m -> Go to STOP_2. |
+| **6** | **STOP_2** | **Stop Motors.** Set Red LED.<br>Wait 1.0 seconds -> Go to FORWARD_2. |
+| **7** | **FORWARD_2** | **Drive Forward:** Move at set speed.<br>**Check Sensor:** If Dist < 0.25m -> Go to STOP_3. |
+| **8** | **STOP_3** | **Stop Motors.** Set Red LED.<br>Wait 1.0 seconds -> Go to BACKWARD_FINAL. |
+| **9** | **BACKWARD_FINAL** | **Drive Backward:** Move at set speed.<br>**Check Sensor:** If Dist > 0.5m -> TERMINATE. |
+| **10** | **TERMINATE** | **Stop Motors.** Blink Red LED (5s).<br>Shutdown System. |
 
 #### 3.4 (4%) Energy Efficient Path Planning 
 > The goal is using this robot to cover a rectangle-shape area.
 > Do your research, make reasonable assumptions and propose a path pattern for the robot to follow.
-> Please state why this pattern is energy efficient.  
+> Please state why this pattern is energy efficient.
+>
+### 3.4 Energy Efficient Path Planning
+
+**Proposed Pattern: The Boustrophedon (Lawnmower) Path**
+
+To cover a rectangular area with maximum energy efficiency, I propose a **Boustrophedon path**, also known as a "Lawnmower" or "Zig-Zag" pattern.
+
+**Path Description:**
+1. The robot starts at one corner of the rectangle.<br>
+2. It travels in a straight line to the opposite edge.<br>
+3. Upon reaching the boundary, it makes a 90° turn, moves laterally by the width of the robot (or cleaning width), and turns 90° again to face the opposite direction.<br>
+4. It traverses back across the area parallel to the first line.<br>
+5. This repeats until the area is filled.
+
+**Efficiency Analysis:**
+
+* **Minimized Overlap:**<br>
+    A random bounce strategy relies on probability to cover the floor, often traversing the same specific area dozens of times to reach a missed spot. Re-driving over covered areas wastes battery power. The Boustrophedon path covers each square foot exactly once (ideally), minimizing total distance traveled.
+
+* **Reduced Turning Costs:**<br>
+    Turning a differential drive robot often consumes more current than driving straight (due to friction against the turn). This pattern consists of long straight lines with minimal turns (only at the edges), whereas a spiral or random pattern involves constant, energy-consuming orientation changes.
+
+* **Predictable Time:**<br>
+    The energy required is a direct function of the area size ($Area / RobotWidth \times Speed$), allowing for precise battery management, whereas random coverage has a high variance in energy consumption to achieve 100% coverage.
+
