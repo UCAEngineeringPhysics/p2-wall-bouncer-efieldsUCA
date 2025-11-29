@@ -84,9 +84,9 @@ Major required components are listed below:
 - Denote dimensions and locations of the wheel assembly and the caster wheel.
 - Denote locations of the mounting holes.
 - Denote dimensions of the mounting holes.
-![Dimensions](p2_measure_front.jpg)
-![Dimensions](p2_measure_side.jpg)
-![Dimensions](p2_measre_rear.jpg)
+![Dimensions](p2_measure_front.JPG)
+![Dimensions](p2_measure_side.JPG)
+![Dimensions](p2_measre_rear.JPG)
 > [!TIP]
 > - You may want to checkout TechDraw of FreeCAD. Other CAD software should have the similar tools.  
 > - Hand drawings are acceptable.
