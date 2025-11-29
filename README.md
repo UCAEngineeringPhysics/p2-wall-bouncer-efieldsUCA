@@ -106,64 +106,25 @@ Parameters:
     Retreat_Dist = 1.0 m
     Battery_Low_Time = 45 s
 
-1:  Initialize Hardware (Motors, Sensor, LEDs)
-2:  System Check:
-3:      if Sensor.read() == Error then
-4:          LED <- RED
-5:          Halt System
-6:      else
-7:          Flash LEDs (White)
-8:          State <- PAUSE_MODE
+ ### 3.3 Software Design
 
-9:  Loop:
-10:     d <- Sensor.get_distance()
-11:     
-12:     // Mode Switching
-13:     if b is Pressed then
-14:         Toggle State between PAUSE_MODE and WORK_MODE
-15:
-16:     // Low Battery Simulation
-17:     if t_accumulated > Battery_Low_Time then
-18:         Set Low Power Mode (Speed = 50%, LED = Blue)
-19:
-20:     // Main State Machine
-21:     if State == WORK_MODE then
-22:         switch Sequence_Step do:
-23:             case FORWARD_1:
-24:                 Motor.move(Forward)
-25:                 if d < Safe_Dist then Step <- STOP_1
-26:
-27:             case STOP_1:
-28:                 Motor.stop()
-29:                 if Wait(1.0s) Complete then Step <- BACKWARD_1
-30:
-31:             case BACKWARD_1:
-32:                 Motor.move(Backward)
-33:                 if d > Retreat_Dist then Step <- STOP_2
-34:
-35:             case STOP_2:
-36:                 Motor.stop()
-37:                 if Wait(1.0s) Complete then Step <- FORWARD_2
-38:
-39:             case FORWARD_2:
-40:                 Motor.move(Forward)
-41:                 if d < Safe_Dist then Step <- STOP_3
-42:
-43:             case STOP_3:
-44:                 Motor.stop()
-45:                 if Wait(1.0s) Complete then Step <- BACKWARD_FINAL
-46:
-47:             case BACKWARD_FINAL:
-48:                 Motor.move(Backward)
-49:                 if d > 0.5m then State <- TERMINATE
-50:
-51:     else if State == PAUSE_MODE then
-52:         Motor.stop()
-53:         Fade Green LED
-54:
-55:     else if State == TERMINATE then
-56:         Blink Red LED
-57:         Shutdown System
+**Wall Avoidance Strategy:**<br>
+The robot employs a linear "stop-and-reverse" strategy. Instead of turning, the robot maintains a straight trajectory. When the ultrasonic sensor detects an obstacle within the safety threshold ($< 25cm$), the robot halts, waits, and reverses direction until it reaches a safe retreat distance ($> 100cm$), effectively "bouncing" back and forth linearly.
+
+**Algorithm 1: Wall Bouncer State Machine**
+
+| Step | State | Action / Logic |
+| :--- | :--- | :--- |
+| **1** | **Initialization** | Initialize Hardware. Check Sensor ($>0$).<br>If Error: **Red LED** & Halt.<br>If Pass: **Flash White LED** & Enter PAUSE. |
+| **2** | **PAUSE_MODE** | **Stop Motors**. Fade Green LED (1Hz).<br>Wait for Button Press -> Enter WORK_MODE. |
+| **3** | **WORK_MODE** | **Check Battery:** If time > 45s, Set Blue LED & 50% Speed.<br>**Drive Forward:** Move at set speed.<br>**Check Sensor:** If Dist < 0.25m -> Go to STOP_1. |
+| **4** | **STOP_1** | **Stop Motors.** Set Red LED.<br>Wait 1.0 seconds -> Go to BACKWARD_1. |
+| **5** | **BACKWARD_1** | **Drive Backward:** Move at set speed.<br>**Check Sensor:** If Dist > 1.0m -> Go to STOP_2. |
+| **6** | **STOP_2** | **Stop Motors.** Set Red LED.<br>Wait 1.0 seconds -> Go to FORWARD_2. |
+| **7** | **FORWARD_2** | **Drive Forward:** Move at set speed.<br>**Check Sensor:** If Dist < 0.25m -> Go to STOP_3. |
+| **8** | **STOP_3** | **Stop Motors.** Set Red LED.<br>Wait 1.0 seconds -> Go to BACKWARD_FINAL. |
+| **9** | **BACKWARD_FINAL** | **Drive Backward:** Move at set speed.<br>**Check Sensor:** If Dist > 0.5m -> TERMINATE. |
+| **10** | **TERMINATE** | **Stop Motors.** Blink Red LED (5s).<br>Shutdown System. |
 
 #### 3.4 (4%) Energy Efficient Path Planning 
 > The goal is using this robot to cover a rectangle-shape area.
