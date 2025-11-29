@@ -84,7 +84,9 @@ Major required components are listed below:
 - Denote dimensions and locations of the wheel assembly and the caster wheel.
 - Denote locations of the mounting holes.
 - Denote dimensions of the mounting holes.
-
+![Dimensions](p2_measure_front.jpg)
+![Dimensions](p2_measure_side.jpg)
+![Dimensions](p2_measre_rear.jpg)
 > [!TIP]
 > - You may want to checkout TechDraw of FreeCAD. Other CAD software should have the similar tools.  
 > - Hand drawings are acceptable.
@@ -93,6 +95,7 @@ Major required components are listed below:
 - Specify power wires using red and black wires.
 - Mark out employed signal pins' names.
 - Electronic components' values have to match your actual circuit.
+![Cicuit Diagram](20251127_210534.jpg)
 
 #### 3.3 (6%) Software Design
 Use a [flowchart](https://en.wikipedia.org/wiki/Flowchart) or a [algorithm/pseudocode table](https://www.overleaf.com/learn/latex/Algorithms) or a [itemized list](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#lists) to explain your wall avoidance strategy.
